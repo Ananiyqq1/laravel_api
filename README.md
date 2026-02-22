@@ -1,6 +1,6 @@
 # Architectura Studio Management API
 
-A RESTful API built with Laravel for managing architectural clients and billing. This project follows the architecture patterns described in the provided technical transcript and integrates with the structural studio theme.
+A RESTful API built with Laravel for managing architectural clients and billing. This project follows the Restful API architecture patterns and integrates with the structural studio theme.
 
 ## Features
 
