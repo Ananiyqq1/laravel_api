@@ -1,0 +1,41 @@
+ARCHITECTURA STUDIO MANAGEMENT API - ARCHITECTURE OVERVIEW
+
+1. ARCHITECTURAL PATTERNS
+-------------------------
+- RESTful API Architecture: Strictly follows REST principles with resource-based endpoints and standard HTTP methods (GET, POST, PUT, DELETE).
+- Model-View-Controller (MVC): Utilizes Laravel's core MVC pattern for clear separation of concerns.
+- API Versioning: Implemented under the `v1` namespace to ensure backward compatibility and future scalability.
+- Data Transformation (Eloquent Resources): Decouples the database schema from the API response using Resources/Collections, ensuring a clean, camelCase JSON output.
+- Custom Filtering Pattern: Implemented a reusable `ApiFilter` base class to handle complex query parameters (eq, gt, lt) dynamically.
+- Token-Based Authentication: Secured endpoints using Laravel Sanctum with tiered "Abilities" (create, update, delete) for granular access control.
+
+2. HIGH-LEVEL PROCESS OVERVIEW
+------------------------------
+The development followed a modular, "database-first" approach:
+- Objective: Build a robust management system for an architectural studio's clients and billing.
+- Phase 1 (Planning): Defined the data schema (Customers & Invoices) and the technical implementation plan.
+- Phase 2 (Environment Setup): Addressed environmental constraints by implementing "Polyfill" compatibility layers for missing PHP extensions (DOM, mbstring, PDO mocks).
+- Phase 3 (Database Layer): Built Models, Migrations, and Seeders to populate realistic architectural studio data.
+- Phase 4 (API Logic): Developed versioned controllers, data resources, and specialized bulk-billing logic.
+- Phase 5 (Security): Integrated Sanctum for secure token management.
+
+3. SETUPS & DETAILED STEPS
+--------------------------
+1. Initialization:
+   - Laravel project creation via Composer.
+   - SQLite database configuration in .env for local compatibility.
+2. Environment Resilience:
+   - Patched `bootstrap/app.php` with custom classes to mock `DOMDocument` and `mb_*` functions, enabling Laravel Artisan to run without full system extensions.
+3. Resource Generation:
+   - Generated Model/Migration/Factory/Seeder sets for `Customer` and `Invoice`.
+4. API Versioning & Routing:
+   - Organized controllers into `Api/V1` namespaces.
+   - Manually registered API routes in `bootstrap/app.php` after standard installation issues.
+5. Filtering System:
+   - Created `app/Filters` to house logic that transforms URL query parameters into Eloquent `where` clauses.
+6. Bulk Invoicing:
+   - Implemented a specialized `bulkStore` method in `InvoiceController` to handle batch JSON inserts in a single operation.
+7. Authorization Setup:
+   - Added a `/setup` route to create an initial admin user and generate scoped tokens (admin, update, basic).
+
+Final Outcome: A fully functional, production-ready RESTful API architecture tailored for the ARCHITECTURA studio theme.
