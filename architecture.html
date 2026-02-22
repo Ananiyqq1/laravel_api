@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARCHITECTURA | The Final Construct</title>
+    <style>
+        /* --- RESET & VARIABLES --- */
+        :root {
+            --bg: #f4f4f4;
+            --fg: #111111;
+            --accent: #555555;
+            --highlight: #000000;
+            --grid-line: #dcdcdc;
+            --card-bg: #ffffff;
+            --font-heading: 'Times New Roman', serif;
+            --font-mono: 'Courier New', monospace;
+            --font-body: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            --spacing-unit: 2rem;
+            --scroll-padding: 120px;
+        }
+
+        /* DARK MODE */
+        body.dark-mode {
+            --bg: #0a0a0a;
+            --fg: #f0f0f0;
+            --accent: #888888;
+            --highlight: #ffffff;
+            --grid-line: #333333;
+            --card-bg: #141414;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: var(--scroll-padding);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--fg);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            line-height: 1.6;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        /* --- BACKGROUND FX --- */
+        .bg-grain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 999;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        #geometry-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.08;
+            pointer-events: none;
+            /* Increased opacity slightly to see grid better */
+        }
+
+        /* --- TYPOGRAPHY --- */
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+        }
+
+        .mono {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            letter-spacing: -0.05em;
+        }
+
+        .label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--accent);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        /* --- NAVIGATION --- */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            mix-blend-mode: difference;
+            color: white;
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: inherit;
+            text-decoration: none;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            border-bottom: 1px solid transparent;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover {
+            border-bottom: 1px solid white;
+        }
+
+        .nav-tools {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .tool-btn {
+            background: transparent;
+            border: 1px solid white;
+            color: white;
+            padding: 0.5rem 1rem;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .tool-btn:hover {
+            background: white;
+            color: black;
+        }
+
+        /* --- HERO --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            border-bottom: 1px solid var(--fg);
+            padding: 0 2rem;
+        }
+
+        .hero h1 {
+            font-size: clamp(4rem, 12vw, 14rem);
+            line-height: 0.85;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            max-width: 600px;
+            border-left: 2px solid var(--fg);
+            padding-left: 1rem;
+        }
+
+        /* --- LAYOUT --- */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        section {
+            position: relative;
+            border-bottom: 1px solid var(--grid-line);
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 4rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--fg);
+        }
+
+        .section-number {
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--grid-line);
+            line-height: 0.8;
+            margin-right: 1rem;
+        }
+
+        /* --- CARDS --- */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--fg);
+            padding: 2rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 10px 10px 0px var(--fg);
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--fg);
+        }
+
+        .ref-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--fg);
+            color: var(--bg);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* --- INTERACTIVE TOOLS --- */
+        .tool-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--fg);
+            padding: 2rem;
+            margin-bottom: 3rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .controls input {
+            background: var(--bg);
+            border: 1px solid var(--accent);
+            padding: 0.8rem;
+            width: 100%;
+            font-family: var(--font-mono);
+            margin-bottom: 1rem;
+            color: var(--fg);
+            font-size: 1rem;
+        }
+
+        .calc-btn {
+            width: 100%;
+            background: var(--fg);
+            color: var(--bg);
+            padding: 1rem;
+            border: none;
+            font-family: var(--font-mono);
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .calc-btn:hover {
+            opacity: 0.8;
+        }
+
+        .visualizer {
+            background: var(--bg);
+            border: 1px solid var(--grid-line);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* --- STUDIO LIST --- */
+        .studio-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1px;
+            background: var(--grid-line);
+            border: 1px solid var(--grid-line);
+        }
+
+        .studio-item {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .studio-item:hover {
+            background: var(--fg);
+            color: var(--bg);
+        }
+
+        /* --- REFERENCE SIDEBAR --- */
+        #library-sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 400px;
+            height: 100%;
+            background: var(--card-bg);
+            border-left: 2px solid var(--fg);
+            z-index: 500;
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: -10px 0 50px rgba(0, 0, 0, 0.1);
+        }
+
+        #library-sidebar.active {
+            transform: translateX(0);
+        }
+
+        .library-header {
+            padding: 2rem;
+            border-bottom: 1px solid var(--grid-line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg);
+        }
+
+        .library-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .close-lib {
+            font-size: 2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--fg);
+        }
+
+        .lib-card {
+            margin-bottom: 2rem;
+            opacity: 0.4;
+            transition: 0.3s;
+            padding: 1rem;
+            border-left: 2px solid transparent;
+        }
+
+        .lib-card.active {
+            opacity: 1;
+            border-left-color: var(--fg);
+            background: var(--bg);
+            padding-left: 1.5rem;
+        }
+
+        .lib-title {
+            font-family: var(--font-heading);
+            font-style: italic;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+
+        .lib-meta {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        /* --- FOOTER (BIBLIOGRAPHY) --- */
+        footer {
+            background: var(--fg);
+            color: var(--bg);
+            padding: 6rem 2rem;
+            font-size: 0.9rem;
+        }
+
+        .biblio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 4rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .biblio-col h4 {
+            margin-bottom: 2rem;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            border-bottom: 1px solid var(--accent);
+            padding-bottom: 1rem;
+        }
+
+        .biblio-entry {
+            margin-bottom: 2rem;
+        }
+
+        .biblio-title {
+            font-family: var(--font-heading);
+            font-style: italic;
+            font-weight: bold;
+            display: block;
+        }
+
+        .biblio-author {
+            font-family: var(--font-mono);
+            display: block;
+            margin-top: 0.2rem;
+            opacity: 0.7;
+        }
+
+        .biblio-details {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            opacity: 0.5;
+            margin-top: 0.5rem;
+            display: block;
+        }
+
+        /* --- UTILS --- */
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .tool-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .section-head {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        /*Blueprint Aesthetic Add-ons */
+        body.blueprint-mode {
+            --bg: #003366;
+            --fg: #ffffff;
+            --accent: #add8e6;
+            --highlight: #ffffff;
+            --grid-line: rgba(255, 255, 255, 0.2);
+            --card-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        body.blueprint-mode .bg-grain {
+            opacity: 0.1;
+            background-image: radial-gradient(var(--grid-line) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .hero h1 {
+                font-size: 8vw;
+            }
+
+            .container {
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .tool-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .section-head {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .hero h1 {
+                font-size: 15vw;
+            }
+
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            #library-sidebar {
+                width: 100%;
+            }
+        }
+
+        /* Interactive Plan Generator Styles */
+        .plan-generator {
+            background: var(--card-bg);
+            border: 2px solid var(--fg);
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .plan-canvas {
+            width: 100%;
+            height: 300px;
+            background: var(--bg);
+            border: 1px solid var(--grid-line);
+            position: relative;
+            margin-top: 1.5rem;
+            overflow: hidden;
+        }
+
+        .room-box {
+            position: absolute;
+            border: 2px solid var(--fg);
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--fg);
+        }
+
+        .blueprint-label {
+            font-family: 'Courier New', Courier, monospace;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-grain"></div>
+    <canvas id="geometry-canvas"></canvas>
+
+    <nav>
+        <div class="nav-brand">ARCHITECTURA</div>
+        <div class="nav-links">
+            <a href="#fundamentals">Fundamentals</a>
+            <a href="#structure">Structure</a>
+            <a href="#studio">Studio</a>
+            <a href="#" onclick="toggleLibrary(event); return false;">Library</a>
+        </div>
+        <div class="nav-tools">
+            <button class="tool-btn" onclick="toggleView()" id="view-toggle">VIEW: PERSP</button>
+            <button class="tool-btn" onclick="toggleBlueprint()" id="blueprint-toggle">BLUEPRINT: OFF</button>
+            <button class="tool-btn" onclick="toggleTheme()">THEME</button>
+        </div>
+    </nav>
+
+    <!-- REFERENCE LIBRARY SIDEBAR -->
+    <div id="library-sidebar">
+        <div class="library-header">
+            <h3 class="mono">REFERENCE CATALOG</h3>
+            <button class="close-lib" onclick="toggleLibrary()">×</button>
+        </div>
+        <div class="library-content" id="library-list">
+            <!-- Books injected via JS -->
+        </div>
+    </div>
+
+    <header class="hero">
+        <div class="label">01 / MANIFESTO</div>
+        <h1>FORM<br>IS<br>LOGIC.</h1>
+        <p class="mono" data-book="8">
+            "Perspective is not merely a technique of representation, but a symbolic form."
+            <br><span style="opacity:0.6">— Panofsky</span>
+        </p>
+    </header>
+
+    <main>
+        <!-- SECTION 1: FUNDAMENTALS -->
+        <section id="fundamentals">
+            <div class="container">
+                <div class="section-head">
+                    <h2><span class="section-number">02</span>FUNDAMENTALS</h2>
+                    <p class="mono">Geometry, Proportion, and Space</p>
+                </div>
+
+                <!-- Interactive Golden Section Calculator -->
+                <div class="tool-panel" data-book="2">
+                    <div class="controls">
+                        <span class="label">// CALCULATOR: GOLDEN SECTION</span>
+                        <p style="margin-bottom: 1.5rem;">Input a dimension to calculate the harmonious partner based on
+                            Φ (1.618).</p>
+
+                        <label class="mono">Side A (Short Side):</label>
+                        <input type="number" id="phi-input" value="100" oninput="updateGoldenSection()">
+
+                        <label class="mono">Mode:</label>
+                        <select id="phi-mode" onchange="updateGoldenSection()"
+                            style="padding:0.8rem; width:100%; background:var(--bg); border:1px solid var(--accent); color:var(--fg); font-family:var(--font-mono); margin-bottom:1rem;">
+                            <option value="calculateLong">Calculate Long Side (A + B)</option>
+                            <option value="calculateShort">Calculate Short Side (A)</option>
+                        </select>
+
+                        <div style="background: var(--bg); padding: 1rem; border: 1px solid var(--grid-line);">
+                            <div class="mono" style="font-size: 0.8rem;">RESULT:</div>
+                            <div id="phi-result-text" style="font-size: 1.5rem; font-weight: bold;">261.80</div>
+                        </div>
+                    </div>
+                    <div class="visualizer" id="phi-visual">
+                        <!-- SVG Spiral injected here -->
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <article class="card" data-book="7">
+                        <span class="ref-btn">7</span>
+                        <h3>Form & Order</h3>
+                        <p>The fundamental elements of form—point, line, plane, and volume—are the vocabulary of
+                            architecture. Their manipulation creates space.</p>
+                    </article>
+                    <article class="card" data-book="1">
+                        <span class="ref-btn">1</span>
+                        <h3>Computational Geometry</h3>
+                        <p>Freeform surfaces require complex mathematical translation. We move beyond Cartesian
+                            coordinates to NURBS and parametric logic.</p>
+                    </article>
+                    <article class="card" data-book="5">
+                        <span class="ref-btn">5</span>
+                        <h3>Visual Dictionary</h3>
+                        <p>Without a shared language, collaboration fails. We define the arch, the vault, and the
+                            portico with precision.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: STRUCTURE -->
+        <section id="structure">
+            <div class="container">
+                <div class="section-head">
+                    <h2><span class="section-number">03</span>STRUCTURE</h2>
+                    <p class="mono">Statics, Loads, and Materials</p>
+                </div>
+
+                <div class="tool-panel" data-book="9">
+                    <div class="controls">
+                        <span class="label">// ENGINEERING: SIMPLE BEAM ANALYSIS</span>
+                        <p style="margin-bottom: 1.5rem;">Analysis of a simply supported beam with a center point load.
+                        </p>
+
+                        <label class="mono">Load (P) [kN]:</label>
+                        <input type="number" id="beam-load" value="20">
+
+                        <label class="mono">Span (L) [m]:</label>
+                        <input type="number" id="beam-span" value="6">
+
+                        <button class="calc-btn" onclick="analyzeBeam()">CALCULATE FORCES</button>
+
+                        <div id="beam-results" class="hidden"
+                            style="margin-top: 1.5rem; border-top: 1px solid var(--grid-line); padding-top: 1rem;">
+                            <div class="mono" style="display:flex; justify-content:space-between;">
+                                <span>R1:</span> <strong id="res-r1">0</strong> kN
+                            </div>
+                            <div class="mono" style="display:flex; justify-content:space-between;">
+                                <span>R2:</span> <strong id="res-r2">0</strong> kN
+                            </div>
+                            <div class="mono"
+                                style="display:flex; justify-content:space-between; margin-top:0.5rem; border-top:1px solid var(--grid-line); padding-top:0.5rem;">
+                                <span>Max Moment (M):</span> <strong id="res-moment">0</strong> kNm
+                            </div>
+                            <p class="mono" style="font-size: 0.7rem; opacity: 0.6; margin-top: 1rem;">Eq: M = PL/4</p>
+                        </div>
+                    </div>
+                    <div class="visualizer" style="background: var(--card-bg);">
+                        <svg id="beam-diagram" width="100%" height="100%" viewBox="0 0 400 200"
+                            style="width: 100%; height: 100%;">
+                            <!-- Dynamic Beam Diagram -->
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: STUDIO -->
+        <section id="studio">
+            <div class="container">
+                <div class="section-head">
+                    <h2><span class="section-number">04</span>THE STUDIO</h2>
+                    <p class="mono">Practice, Heuristics, and Drawing</p>
+                </div>
+
+                <div class="studio-list" id="things-list">
+                    <!-- Items injected via JS -->
+                </div>
+
+                <!-- Plan Generator -->
+                <div class="plan-generator">
+                    <span class="label">// STUDIO TOOL: PROCEDURAL PLAN GENERATOR</span>
+                    <p class="mono">Generate a conceptual floor plan based on architectural logic.</p>
+                    <div style="display:flex; gap: 1rem; margin-top: 1rem;">
+                        <input type="number" id="room-count" value="4" min="1" max="10"
+                            style="padding:0.5rem; width:80px; background:var(--bg); border:1px solid var(--accent); color:var(--fg);">
+                        <button class="calc-btn" onclick="generatePlan()" style="padding:0.5rem 1rem;">GENERATE NEW
+                            PLAN</button>
+                    </div>
+                    <div class="plan-canvas" id="plan-canvas">
+                        <!-- Procedural rooms injected here -->
+                    </div>
+                </div>
+
+                <div class="grid-3" style="margin-top: 3rem;">
+                    <article class="card" data-book="6">
+                        <span class="ref-btn">6</span>
+                        <h3>Draw to Understand</h3>
+                        <p>Architectural drawing is not merely representation; it is a critical act of analysis. Through
+                            the hand, the mind understands the geometry of the site.</p>
+                    </article>
+                    <article class="card" data-book="4">
+                        <span class="ref-btn">4</span>
+                        <h3>101 Heuristics</h3>
+                        <p>Process over product. Being flexible in the early stages allows the building to emerge from
+                            the constraints of the site.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="label">05 / BIBLIOGRAPHY</div>
+        <div class="biblio-grid">
+            <div class="biblio-col">
+                <h4>Theory & Geometry</h4>
+                <div class="biblio-entry">
+                    <span class="biblio-title">The Geometry of Art and Life</span>
+                    <span class="biblio-author">Matila Ghyka</span>
+                    <span class="biblio-details">Dover Publications; 1977. ISBN 978-0486235424</span>
+                </div>
+                <div class="biblio-entry">
+                    <span class="biblio-title">Perspective as a Symbolic Form</span>
+                    <span class="biblio-author">Erwin Panofsky</span>
+                    <span class="biblio-details">Zone Books; 1991. ISBN 978-0942299539</span>
+                </div>
+                <div class="biblio-entry">
+                    <span class="biblio-title">Architecture: Form, Space, and Order</span>
+                    <span class="biblio-author">Francis D.K. Ching</span>
+                    <span class="biblio-details">Wiley; 4th Edition, 2014. ISBN 978-1118745083</span>
+                </div>
+            </div>
+
+            <div class="biblio-col">
+                <h4>Math & Structure</h4>
+                <div class="biblio-entry">
+                    <span class="biblio-title">Architectural Geometry</span>
+                    <span class="biblio-author">Hirsch Pottmann et al.</span>
+                    <span class="biblio-details">Bentley Institute Press; 2007. ISBN 978-1934493045</span>
+                </div>
+                <div class="biblio-entry">
+                    <span class="biblio-title">Structural Analysis</span>
+                    <span class="biblio-author">Russell C. Hibbeler</span>
+                    <span class="biblio-details">Pearson; 10th Edition, 2018. ISBN 978-0134610672</span>
+                </div>
+                <div class="biblio-entry">
+                    <span class="biblio-title">The Architect's Studio Companion</span>
+                    <span class="biblio-author">Edward Allen & Joseph Iano</span>
+                    <span class="biblio-details">Wiley; 6th Edition, 2017. ISBN 978-1119092414</span>
+                </div>
+            </div>
+
+            <div class="biblio-col">
+                <h4>Practice & Design</h4>
+                <div class="biblio-entry">
+                    <span class="biblio-title">101 Things I Learned in Architecture School</span>
+                    <span class="biblio-author">Matthew Frederick</span>
+                    <span class="biblio-details">MIT Press; 2nd Edition, 2007. ISBN 978-0262062664</span>
+                </div>
+                <div class="biblio-entry">
+                    <span class="biblio-title">Architectural Drawing Course</span>
+                    <span class="biblio-author">Mo Zell</span>
+                    <span class="biblio-details">Laurence King Publishing; 2008. ISBN 978-1856696188</span>
+                </div>
+                <div class="biblio-entry">
+                    <span class="biblio-title">A Visual Dictionary of Architecture</span>
+                    <span class="biblio-author">Francis D.K. Ching</span>
+                    <span class="biblio-details">Wiley; 2nd Edition, 2011. ISBN 978-0470648858</span>
+                </div>
+            </div>
+        </div>
+        <div
+            style="text-align: center; margin-top: 6rem; opacity: 0.5; font-family: var(--font-mono); font-size: 0.7rem;">
+            &copy; 2024 ARCHITECTURA. DESIGNED FOR PRECISION.
+        </div>
+    </footer>
+
+    <script>
+        // --- DATA ---
+        const books = [
+            { id: 1, title: "Architectural Geometry", author: "Hirsch Pottmann et al.", pub: "Bentley Institute Press (2007)" },
+            { id: 2, title: "The Geometry of Art and Life", author: "Matila Ghyka", pub: "Dover Publications (1977)" },
+            { id: 3, title: "Structural Analysis", author: "Russell C. Hibbeler", pub: "Pearson (2018)" },
+            { id: 4, title: "101 Things I Learned...", author: "Matthew Frederick", pub: "MIT Press (2007)" },
+            { id: 5, title: "Visual Dictionary of Architecture", author: "Francis D.K. Ching", pub: "Wiley (2011)" },
+            { id: 6, title: "Architectural Drawing Course", author: "Mo Zell", pub: "Laurence King (2008)" },
+            { id: 7, title: "Form, Space, and Order", author: "Francis D.K. Ching", pub: "Wiley (2014)" },
+            { id: 8, title: "Perspective as Symbolic Form", author: "Erwin Panofsky", pub: "Zone Books (1991)" },
+            { id: 9, title: "The Architect's Studio Companion", author: "Allen & Iano", pub: "Wiley (2017)" }
+        ];
+
+        const studioItems = [
+            { text: "Being process-oriented, not product-oriented, works best in design.", id: 4 },
+            { text: "Design with ideas, not forms.", id: 4 },
+            { text: "A good drawing reveals what you are looking for.", id: 6 },
+            { text: "Windows look dark in the daytime.", id: 4 },
+            { text: "The most sustainable building is the one that is already built.", id: 4 },
+            { text: "Engineers add numbers to things. Architects add meaning.", id: 4 },
+            { text: "Less is a bore.", id: 4 },
+            { text: "Design is an act of making choices.", id: 4 }
+        ];
+
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initLibrary();
+            initStudioList();
+            updateGoldenSection();
+            drawBeamDiagram(20, 6); // Initial draw
+            initCanvas();
+            initHoverEffects();
+        });
+
+        // --- LIBRARY SYSTEM ---
+        function initLibrary() {
+            const container = document.getElementById('library-list');
+            books.forEach(book => {
+                const div = document.createElement('div');
+                div.className = 'lib-card';
+                div.id = `lib-${book.id}`;
+                div.innerHTML = `
+                    <span class="lib-title">${book.title}</span>
+                    <span class="lib-meta">${book.author}</span>
+                    <span class="lib-meta">${book.pub}</span>
+                    <span class="mono" style="font-size:0.7rem; margin-top:0.5rem; color:var(--accent)">ID: REF-00${book.id}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function toggleLibrary(e) {
+            if (e) e.preventDefault();
+            document.getElementById('library-sidebar').classList.toggle('active');
+        }
+
+        function highlightBook(id) {
+            const sidebar = document.getElementById('library-sidebar');
+            if (!sidebar.classList.contains('active')) toggleLibrary();
+
+            document.querySelectorAll('.lib-card').forEach(c => c.classList.remove('active'));
+            const target = document.getElementById(`lib-${id}`);
+            if (target) {
+                target.classList.add('active');
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function initHoverEffects() {
+            document.querySelectorAll('[data-book]').forEach(el => {
+                el.addEventListener('mouseenter', (e) => {
+                    const id = e.currentTarget.getAttribute('data-book');
+                    if (document.getElementById('library-sidebar').classList.contains('active')) {
+                        highlightBook(id);
+                    }
+                });
+                el.addEventListener('click', (e) => {
+                    const id = e.currentTarget.getAttribute('data-book');
+                    highlightBook(id);
+                });
+            });
+        }
+
+        // --- GOLDEN SECTION CALCULATOR ---
+        function updateGoldenSection() {
+            const input = parseFloat(document.getElementById('phi-input').value);
+            const mode = document.getElementById('phi-mode').value;
+            const phi = 1.61803398875;
+
+            let shortSide, longSide, total;
+
+            if (mode === 'calculateLong') {
+                shortSide = input;
+                longSide = input * phi;
+                total = shortSide + longSide;
+                document.getElementById('phi-result-text').innerText = longSide.toFixed(2);
+            } else {
+                longSide = input;
+                shortSide = longSide / phi;
+                total = shortSide + longSide;
+                document.getElementById('phi-result-text').innerText = shortSide.toFixed(2);
+            }
+
+            drawGoldenSpiral(shortSide, longSide);
+        }
+
+        function drawGoldenSpiral(short, long) {
+            const container = document.getElementById('phi-visual');
+            const padding = 20;
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight;
+
+            // Scale to fit container
+            const scale = Math.min(
+                (containerWidth - padding * 2) / long,
+                (containerHeight - padding * 2) / long
+            );
+
+            const s = short * scale;
+            const l = long * scale;
+            const w = l;
+            const h = s;
+
+            const startX = (containerWidth - w) / 2;
+            const startY = (containerHeight - h) / 2;
+
+            const svg = `
+                <svg width="100%" height="100%">
+                    <rect x="${startX}" y="${startY}" width="${w}" height="${h}" stroke="black" fill="none" stroke-width="2"/>
+                    <line x1="${startX + s}" y1="${startY}" x2="${startX + s}" y2="${startY + h}" stroke="black" stroke-width="1"/>
+                    
+                    <!-- Spiral approximation -->
+                    <path d="M ${startX + s} ${startY + h} A ${s} ${s} 0 0 1 ${startX + s} ${startY}" 
+                          fill="none" stroke="black" stroke-width="2" opacity="0.5"/>
+                    
+                    <text x="${startX + s / 2}" y="${startY + h / 2}" font-family="monospace" font-size="12" text-anchor="middle">A²</text>
+                    <text x="${startX + s + (l - s) / 2}" y="${startY + h / 2}" font-family="monospace" font-size="12" text-anchor="middle">AB</text>
+                </svg>
+            `;
+            container.innerHTML = svg;
+        }
+
+        // --- STRUCTURE ANALYSIS ---
+        function analyzeBeam() {
+            const P = parseFloat(document.getElementById('beam-load').value);
+            const L = parseFloat(document.getElementById('beam-span').value);
+
+            const R = P / 2;
+            const M = (P * L) / 4;
+
+            document.getElementById('res-r1').innerText = R.toFixed(2);
+            document.getElementById('res-r2').innerText = R.toFixed(2);
+            document.getElementById('res-moment').innerText = M.toFixed(2);
+
+            document.getElementById('beam-results').classList.remove('hidden');
+            drawBeamDiagram(P, L);
+        }
+
+        function drawBeamDiagram(P, L) {
+            const svg = document.getElementById('beam-diagram');
+            const w = 300;
+            const startX = 50;
+            const y = 100;
+
+            let html = `<line x1="${startX}" y1="${y}" x2="${startX + w}" y2="${y}" stroke="black" stroke-width="4"/>`;
+            html += `<path d="M ${startX} ${y} L ${startX + 10} ${y + 20} L ${startX - 10} ${y + 20} Z" fill="black"/>`;
+            html += `<path d="M ${startX + w} ${y} L ${startX + w + 10} ${y + 20} L ${startX + w - 10} ${y + 20} Z" fill="black"/>`;
+
+            const arrowLen = Math.min(60, P * 2);
+            html += `<line x1="${startX + w / 2}" y1="${y - arrowLen}" x2="${startX + w / 2}" y2="${y}" stroke="black" stroke-width="2"/>`;
+            html += `<path d="M ${startX + w / 2 - 5} ${y - 10} L ${startX + w / 2} ${y} L ${startX + w / 2 + 5} ${y - 10} Z" fill="black"/>`;
+
+            html += `<text x="${startX + w / 2}" y="${y - arrowLen - 10}" text-anchor="middle" font-family="monospace" font-size="14">${P} kN</text>`;
+
+            html += `<line x1="${startX}" y1="${y + 40}" x2="${startX + w}" y2="${y + 40}" stroke="black" stroke-dasharray="4"/>`;
+            html += `<line x1="${startX}" y1="${y + 35}" x2="${startX}" y2="${y + 45}" stroke="black"/>`;
+            html += `<line x1="${startX + w}" y1="${y + 35}" x2="${startX + w}" y2="${y + 45}" stroke="black"/>`;
+            html += `<text x="${startX + w / 2}" y="${y + 55}" text-anchor="middle" font-family="monospace" font-size="12">${L} m</text>`;
+
+            html += `<text x="${startX}" y="${y + 35}" text-anchor="middle" font-family="monospace" font-size="12">R1</text>`;
+            html += `<text x="${startX + w}" y="${y + 35}" text-anchor="middle" font-family="monospace" font-size="12">R2</text>`;
+
+            svg.innerHTML = html;
+        }
+
+        // --- STUDIO LIST ---
+        function initStudioList() {
+            const container = document.getElementById('things-list');
+            studioItems.forEach((item, i) => {
+                const div = document.createElement('div');
+                div.className = 'studio-item';
+                div.innerHTML = `<strong style="margin-right:10px; opacity:0.5">${i + 1}.</strong> ${item.text}`;
+                div.setAttribute('data-book', item.id);
+                div.onclick = () => highlightBook(item.id);
+                container.appendChild(div);
+            });
+        }
+
+        // --- THEME & CANVAS (FIXED VIEW) ---
+        let viewState = 'perspective';
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        function toggleBlueprint() {
+            document.body.classList.toggle('blueprint-mode');
+            const btn = document.getElementById('blueprint-toggle');
+            if (document.body.classList.contains('blueprint-mode')) {
+                btn.innerText = "BLUEPRINT: ON";
+            } else {
+                btn.innerText = "BLUEPRINT: OFF";
+            }
+        }
+
+        function generatePlan() {
+            const container = document.getElementById('plan-canvas');
+            const count = parseInt(document.getElementById('room-count').value);
+            container.innerHTML = '';
+
+            const roomNames = ["Lobby", "Atrium", "Studio", "Gallery", "Archive", "Vault", "Courtyard", "Mezzanine"];
+
+            for (let i = 0; i < count; i++) {
+                const room = document.createElement('div');
+                room.className = 'room-box';
+
+                const w = 60 + Math.random() * 80;
+                const h = 40 + Math.random() * 60;
+                const x = Math.random() * (container.clientWidth - w);
+                const y = Math.random() * (container.clientHeight - h);
+
+                room.style.width = w + 'px';
+                room.style.height = h + 'px';
+                room.style.left = x + 'px';
+                room.style.top = y + 'px';
+
+                const name = roomNames[i % roomNames.length];
+                room.innerHTML = `<span class="blueprint-label">${name}</span>`;
+                container.appendChild(room);
+            }
+        }
+
+        function toggleView() {
+            viewState = viewState === 'perspective' ? 'isometric' : 'perspective';
+            document.getElementById('view-toggle').innerText = `VIEW: ${viewState.substring(0, 4).toUpperCase()}`;
+        }
+
+        function initCanvas() {
+            const canvas = document.getElementById('geometry-canvas');
+            const ctx = canvas.getContext('2d');
+            let width, height, mouseX = 0, mouseY = 0;
+
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+            }
+
+            window.addEventListener('resize', resize);
+            window.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+            resize();
+
+            function draw() {
+                const stroke = document.body.classList.contains('dark-mode') ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+                ctx.clearRect(0, 0, width, height);
+                ctx.strokeStyle = stroke;
+                ctx.lineWidth = 1;
+
+                if (viewState === 'perspective') {
+                    // --- PERSPECTIVE VIEW ---
+                    // Vanishing point moves with mouse slightly
+                    const vx = width / 2 + (mouseX - width / 2) * 0.4;
+                    const vy = height / 2 + (mouseY - height / 2) * 0.2;
+
+                    ctx.beginPath();
+                    // Floor lines converging to vanishing point
+                    for (let x = -width; x < width * 2; x += 80) {
+                        ctx.moveTo(x, height);
+                        ctx.lineTo(vx, vy);
+                    }
+                    // Ceiling lines converging
+                    for (let x = -width; x < width * 2; x += 80) {
+                        ctx.moveTo(x, 0);
+                        ctx.lineTo(vx, vy);
+                    }
+                    ctx.stroke();
+                } else {
+                    // --- ISOMETRIC VIEW (FIXED PARALLEL LINES) ---
+                    // 30 degrees is approx 0.577 slope
+
+                    ctx.beginPath();
+
+                    // Vertical Lines
+                    for (let x = 0; x < width; x += 40) {
+                        ctx.moveTo(x, 0);
+                        ctx.lineTo(x, height);
+                    }
+
+                    // Diagonal Lines (Left to Right, 30 deg)
+                    // Start from left side, go up
+                    for (let x = -height * 0.577; x < width; x += 40) {
+                        ctx.moveTo(x, height);
+                        ctx.lineTo(x + height * 0.577, 0);
+                    }
+
+                    // Diagonal Lines (Right to Left, -30 deg)
+                    // Start from right side, go up
+                    for (let x = -height * 0.577; x < width + height * 0.577; x += 40) {
+                        ctx.moveTo(x + height * 0.577, 0); // Top right-ish
+                        ctx.lineTo(x, height); // Bottom left-ish
+                    }
+
+                    ctx.stroke();
+                }
+                requestAnimationFrame(draw);
+            }
+            draw();
+        }
+    </script>
+</body>
+
+</html>
