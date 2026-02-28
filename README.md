@@ -43,10 +43,14 @@ All API requests must include a Bearer token in the `Authorization` header.
 - `GET /api/v1/customers/{id}`: Show a specific customer.
 - `POST /api/v1/customers`: Create a new customer.
 - `PUT/PATCH /api/v1/customers/{id}`: Update a customer.
+- `DELETE /api/v1/customers/{id}`: Delete a customer.
 
 #### Invoices
 - `GET /api/v1/invoices`: List all invoices.
 - `GET /api/v1/invoices/{id}`: Show a specific invoice.
+- `POST /api/v1/invoices`: Create a single invoice.
+- `PUT/PATCH /api/v1/invoices/{id}`: Update an invoice.
+- `DELETE /api/v1/invoices/{id}`: Delete an invoice.
 - `POST /api/v1/invoices/bulk`: Bulk insert invoices.
 
 ### Filtering Examples

@@ -27,9 +27,9 @@ class InvoiceController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(\App\Http\Requests\Api\V1\StoreInvoiceRequest $request)
     {
-        //
+        return new \App\Http\Resources\Api\V1\InvoiceResource(Invoice::create($request->all()));
     }
 
     public function bulkStore(\App\Http\Requests\Api\V1\BulkStoreInvoiceRequest $request)
@@ -52,9 +52,9 @@ class InvoiceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Invoice $invoice)
+    public function update(\App\Http\Requests\Api\V1\UpdateInvoiceRequest $request, Invoice $invoice)
     {
-        //
+        $invoice->update($request->all());
     }
 
     /**
@@ -62,6 +62,6 @@ class InvoiceController extends Controller
      */
     public function destroy(Invoice $invoice)
     {
-        //
+        $invoice->delete();
     }
 }
