@@ -24,9 +24,6 @@ class InvoiceController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(\App\Http\Requests\Api\V1\StoreInvoiceRequest $request)
     {
         return new \App\Http\Resources\Api\V1\InvoiceResource(Invoice::create($request->all()));
@@ -35,11 +32,22 @@ class InvoiceController extends Controller
     public function bulkStore(\App\Http\Requests\Api\V1\BulkStoreInvoiceRequest $request)
     {
         $bulk = collect($request->all())->map(function ($item, $key) {
-            return \Illuminate\Support\Arr::except($item, ['customerId', 'billedDate', 'paidDate']);
+            return [
+                'customer_id' => $item['customer_id'],
+                'amount' => $item['amount'],
+                'status' => $item['status'],
+                'billed_date' => $item['billed_date'],
+                'paid_date' => $item['paid_date'] ?? null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
         });
 
         Invoice::insert($bulk->toArray());
+
+        return response()->json(['message' => 'Invoices processed successfully.'], 201);
     }
+
 
     /**
      * Display the specified resource.
@@ -55,6 +63,8 @@ class InvoiceController extends Controller
     public function update(\App\Http\Requests\Api\V1\UpdateInvoiceRequest $request, Invoice $invoice)
     {
         $invoice->update($request->all());
+
+        return response()->noContent();
     }
 
     /**
@@ -63,5 +73,8 @@ class InvoiceController extends Controller
     public function destroy(Invoice $invoice)
     {
         $invoice->delete();
+
+        return response()->noContent();
     }
+
 }
