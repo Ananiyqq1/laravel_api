@@ -35,7 +35,7 @@ class BulkStoreInvoiceRequest extends FormRequest
     {
         $data = [];
 
-        foreach ($this->all() as $obj) {
+        foreach ($this->toArray() as $obj) {
             $obj['customer_id'] = $obj['customerId'] ?? null;
             $obj['billed_date'] = $obj['billedDate'] ?? null;
             $obj['paid_date'] = $obj['paidDate'] ?? null;
@@ -43,6 +43,7 @@ class BulkStoreInvoiceRequest extends FormRequest
             $data[] = $obj;
         }
 
-        $this->merge($data);
+        $this->replace($data);
     }
+
 }

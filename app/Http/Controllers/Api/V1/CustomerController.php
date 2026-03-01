@@ -49,12 +49,11 @@ class CustomerController extends Controller
         return new \App\Http\Resources\Api\V1\CustomerResource($customer);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(\App\Http\Requests\Api\V1\UpdateCustomerRequest $request, Customer $customer)
     {
         $customer->update($request->all());
+
+        return response()->noContent();
     }
 
     /**
@@ -63,5 +62,8 @@ class CustomerController extends Controller
     public function destroy(Customer $customer)
     {
         $customer->delete();
+
+        return response()->noContent();
     }
+
 }
